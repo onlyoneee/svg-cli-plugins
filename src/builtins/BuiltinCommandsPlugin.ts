@@ -28,14 +28,16 @@ import {
 } from "./commands/index.js";
 
 export class BuiltinCommandsPlugin implements Plugin {
-  private readonly factory = new ShapeFactory();
-  private readonly reader = new SvgReader();
+  private readonly reader: SvgReader;
   private readonly writer = new SvgWriter();
 
   public constructor(
     private readonly session: DefaultCommandContext,
     private readonly commandCatalog: CommandRegistry,
-  ) {}
+    private readonly factory: ShapeFactory,
+  ) {
+    this.reader = new SvgReader(factory);
+  }
 
   public activate(context: PluginContext): void {
     context.commands.register(new InitCliCommand(this.session));

@@ -3,7 +3,6 @@ import { resolve } from "node:path";
 import { EditorError } from "../errors/EditorError.js";
 import { ShapeFactory } from "../model/ShapeFactory.js";
 import { SvgDocument } from "../model/SvgDocument.js";
-import { GroupShape } from "../model/shapes/GroupShape.js";
 import type { Shape } from "../model/shapes/Shape.js";
 import { SimpleXmlParser } from "./SimpleXmlParser.js";
 import type { SvgReadResult } from "./SvgReadResult.js";
@@ -11,8 +10,8 @@ import type { XmlElement } from "./XmlElement.js";
 
 export class SvgReader {
   public constructor(
+    private readonly factory: ShapeFactory,
     private readonly parser = new SimpleXmlParser(),
-    private readonly factory = new ShapeFactory(),
   ) {}
 
   public read(path: string): SvgReadResult {
@@ -33,13 +32,14 @@ export class SvgReader {
     const counters = new Map<string, number>();
 
     for (const child of root.children) {
-      document.add(this.buildShape(child, usedIds, counters, warnings));
+      document.add(this.buildShape(child, document, usedIds, counters, warnings));
     }
     return { document, warnings };
   }
 
   private buildShape(
     element: XmlElement,
+    document: SvgDocument,
     usedIds: Set<string>,
     counters: Map<string, number>,
     warnings: string[],
@@ -51,15 +51,8 @@ export class SvgReader {
       usedIds.add(id);
     }
 
-    const shape = this.factory.createFromSvg(element.name, id, element.attributes, element.text);
-    if (shape instanceof GroupShape) {
-      for (const child of element.children) {
-        shape.addChild(this.buildShape(child, usedIds, counters, warnings));
-      }
-    } else if (element.children.length > 0) {
-      throw new EditorError(`invalid SVG: <${element.name}> cannot contain shapes`);
-    }
-    return shape;
+    const children = element.children.map((child) => this.buildShape(child, document, usedIds, counters, warnings));
+    return this.factory.createFromSvg(element.name, id, element.attributes, element.text, children, document);
   }
 
   private nextId(type: string, usedIds: Set<string>, counters: Map<string, number>): string {

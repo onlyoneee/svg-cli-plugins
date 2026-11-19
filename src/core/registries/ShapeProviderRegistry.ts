@@ -2,7 +2,12 @@ import type { ShapeProvider } from "../../api/ShapeProvider.js";
 import type { ShapeProviderRegistration } from "../../api/ShapeProviderRegistration.js";
 import { EditorError } from "../../errors/EditorError.js";
 
-export class ShapeProviderRegistry implements ShapeProviderRegistration {
+export interface ShapeProviderResolver {
+  findByShapeType(shapeType: string): ShapeProvider | undefined;
+  findForRead(svgTag: string, serializedKind?: string): ShapeProvider | undefined;
+}
+
+export class ShapeProviderRegistry implements ShapeProviderRegistration, ShapeProviderResolver {
   private readonly providers = new Map<string, ShapeProvider>();
   private readonly providersByShapeType = new Map<string, ShapeProvider>();
   private readonly defaultProvidersBySvgTag = new Map<string, ShapeProvider>();

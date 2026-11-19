@@ -19,7 +19,7 @@ export class CreateCommand extends EditingOperation {
   }
 
   protected override apply(document: SvgDocument): string {
-    const shape = this.factory.create(this.type, this.id, this.parameters);
+    const shape = this.factory.create(this.type, this.id, this.parameters, document, this.containerId);
     document.add(shape, this.containerId);
     this.shape = shape;
     this.placement = document.locationOf(shape.id);

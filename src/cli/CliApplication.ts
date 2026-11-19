@@ -1,5 +1,6 @@
 import type { Plugin } from "../api/Plugin.js";
 import { BuiltinCommandsPlugin } from "../builtins/BuiltinCommandsPlugin.js";
+import { BuiltinShapeProvidersPlugin } from "../builtins/BuiltinShapeProvidersPlugin.js";
 import { CommandDispatcher } from "../core/commands/CommandDispatcher.js";
 import { DefaultCommandContext } from "../core/commands/DefaultCommandContext.js";
 import { DefaultPluginContext } from "../core/plugins/DefaultPluginContext.js";
@@ -9,23 +10,27 @@ import { ShapeProviderRegistry } from "../core/registries/ShapeProviderRegistry.
 import { TreeDecoratorRegistry } from "../core/registries/TreeDecoratorRegistry.js";
 import { EditorError } from "../errors/EditorError.js";
 import type { SvgDocument } from "../model/SvgDocument.js";
+import { ShapeFactory } from "../model/ShapeFactory.js";
 import { CommandTokenizer } from "./CommandTokenizer.js";
 
 export class CliApplication {
   private readonly tokenizer = new CommandTokenizer();
   private readonly commandContext = new DefaultCommandContext();
   private readonly commandRegistry = new CommandRegistry();
+  private readonly shapeProviderRegistry = new ShapeProviderRegistry();
   private readonly dispatcher: CommandDispatcher;
 
   public constructor(plugins: readonly Plugin[] = []) {
     const pluginContext = new DefaultPluginContext(
       this.commandRegistry,
-      new ShapeProviderRegistry(),
+      this.shapeProviderRegistry,
       new AttributeHandlerRegistry(),
       new TreeDecoratorRegistry(),
     );
 
-    new BuiltinCommandsPlugin(this.commandContext, this.commandRegistry).activate(pluginContext);
+    new BuiltinShapeProvidersPlugin().activate(pluginContext);
+    const shapeFactory = new ShapeFactory(this.shapeProviderRegistry);
+    new BuiltinCommandsPlugin(this.commandContext, this.commandRegistry, shapeFactory).activate(pluginContext);
     for (const plugin of plugins) {
       const activation = plugin.activate(pluginContext);
       if (activation instanceof Promise) {
