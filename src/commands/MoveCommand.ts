@@ -1,8 +1,8 @@
 import type { SvgDocument } from "../model/SvgDocument.js";
 import type { Shape } from "../model/shapes/Shape.js";
-import { EditingCommand } from "./EditingCommand.js";
+import { EditingOperation } from "./EditingOperation.js";
 
-export class MoveCommand extends EditingCommand {
+export class MoveCommand extends EditingOperation {
   public constructor(
     private readonly id: string,
     private readonly dx: number,

@@ -1,7 +1,7 @@
 import type { SvgDocument } from "../model/SvgDocument.js";
-import { EditingCommand } from "./EditingCommand.js";
+import { EditingOperation } from "./EditingOperation.js";
 
-export class SetCommand extends EditingCommand {
+export class SetCommand extends EditingOperation {
   private oldValue: string | undefined;
 
   public constructor(

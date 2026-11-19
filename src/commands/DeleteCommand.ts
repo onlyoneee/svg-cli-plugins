@@ -1,8 +1,8 @@
 import type { SvgDocument } from "../model/SvgDocument.js";
 import type { ShapePlacement } from "../model/ShapePlacement.js";
-import { EditingCommand } from "./EditingCommand.js";
+import { EditingOperation } from "./EditingOperation.js";
 
-export class DeleteCommand extends EditingCommand {
+export class DeleteCommand extends EditingOperation {
   private placement: ShapePlacement | null = null;
 
   public constructor(private readonly id: string) {

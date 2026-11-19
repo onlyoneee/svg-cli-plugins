@@ -1,6 +1,6 @@
 import { AddToCommand } from "../commands/AddToCommand.js";
 import { BackCommand } from "../commands/BackCommand.js";
-import type { Command } from "../commands/Command.js";
+import type { UndoableOperation } from "../api/UndoableOperation.js";
 import { CommandHistory } from "../commands/CommandHistory.js";
 import { CreateCommand } from "../commands/CreateCommand.js";
 import { DeleteCommand } from "../commands/DeleteCommand.js";
@@ -210,8 +210,8 @@ export class CliApplication {
     ].join("\n");
   }
 
-  private execute(command: Command): string {
-    return this.history.execute(command, this.requireDocument());
+  private execute(operation: UndoableOperation): string {
+    return this.history.execute(operation, this.requireDocument());
   }
 
   private requireDocument(): SvgDocument {

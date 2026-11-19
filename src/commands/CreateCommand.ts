@@ -2,9 +2,9 @@ import type { ShapeFactory } from "../model/ShapeFactory.js";
 import type { ShapePlacement } from "../model/ShapePlacement.js";
 import type { SvgDocument } from "../model/SvgDocument.js";
 import type { Shape } from "../model/shapes/Shape.js";
-import { EditingCommand } from "./EditingCommand.js";
+import { EditingOperation } from "./EditingOperation.js";
 
-export class CreateCommand extends EditingCommand {
+export class CreateCommand extends EditingOperation {
   private shape: Shape | null = null;
   private placement: ShapePlacement | null = null;
 

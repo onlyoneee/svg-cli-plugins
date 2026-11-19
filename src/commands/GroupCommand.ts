@@ -1,9 +1,9 @@
 import type { SvgDocument } from "../model/SvgDocument.js";
 import type { ShapePlacement } from "../model/ShapePlacement.js";
 import type { GroupShape } from "../model/shapes/GroupShape.js";
-import { EditingCommand } from "./EditingCommand.js";
+import { EditingOperation } from "./EditingOperation.js";
 
-export class GroupCommand extends EditingCommand {
+export class GroupCommand extends EditingOperation {
   private originalPlacements: ShapePlacement[] = [];
   private group: GroupShape | null = null;
 

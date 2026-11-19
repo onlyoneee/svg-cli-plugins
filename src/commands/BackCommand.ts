@@ -1,8 +1,8 @@
 import type { SvgDocument } from "../model/SvgDocument.js";
 import type { ShapePlacement } from "../model/ShapePlacement.js";
-import { EditingCommand } from "./EditingCommand.js";
+import { EditingOperation } from "./EditingOperation.js";
 
-export class BackCommand extends EditingCommand {
+export class BackCommand extends EditingOperation {
   private before: ShapePlacement | null = null;
   private after: ShapePlacement | null = null;
 

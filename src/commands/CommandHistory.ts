@@ -1,15 +1,15 @@
 import { EditorError } from "../errors/EditorError.js";
 import type { SvgDocument } from "../model/SvgDocument.js";
-import type { Command } from "./Command.js";
+import type { UndoableOperation } from "../api/UndoableOperation.js";
 
 export class CommandHistory {
-  private readonly undoStack: Command[] = [];
-  private readonly redoStack: Command[] = [];
+  private readonly undoStack: UndoableOperation[] = [];
+  private readonly redoStack: UndoableOperation[] = [];
   private blocked = false;
 
-  public execute(command: Command, document: SvgDocument): string {
-    const result = command.execute(document);
-    this.undoStack.push(command);
+  public execute(operation: UndoableOperation, document: SvgDocument): string {
+    const result = operation.execute(document);
+    this.undoStack.push(operation);
     this.redoStack.length = 0;
     this.blocked = false;
     return result;

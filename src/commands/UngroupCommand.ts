@@ -2,9 +2,9 @@ import type { SvgDocument } from "../model/SvgDocument.js";
 import type { ShapePlacement } from "../model/ShapePlacement.js";
 import type { GroupShape } from "../model/shapes/GroupShape.js";
 import type { Shape } from "../model/shapes/Shape.js";
-import { EditingCommand } from "./EditingCommand.js";
+import { EditingOperation } from "./EditingOperation.js";
 
-export class UngroupCommand extends EditingCommand {
+export class UngroupCommand extends EditingOperation {
   private group: GroupShape | null = null;
   private placement: ShapePlacement | null = null;
   private children: Shape[] = [];

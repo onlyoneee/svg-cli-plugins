@@ -1,7 +1,7 @@
 import type { SvgDocument } from "../model/SvgDocument.js";
-import type { Command } from "./Command.js";
+import type { UndoableOperation } from "../api/UndoableOperation.js";
 
-export abstract class EditingCommand implements Command {
+export abstract class EditingOperation implements UndoableOperation {
   private result = "";
   private executed = false;
 

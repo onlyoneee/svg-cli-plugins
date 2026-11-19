@@ -1,8 +1,8 @@
 import { EditorError } from "../errors/EditorError.js";
 import type { SvgDocument } from "../model/SvgDocument.js";
-import { EditingCommand } from "./EditingCommand.js";
+import { EditingOperation } from "./EditingOperation.js";
 
-export class ScaleCommand extends EditingCommand {
+export class ScaleCommand extends EditingOperation {
   public constructor(
     private readonly id: string,
     private readonly factor: number,
