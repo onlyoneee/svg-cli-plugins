@@ -1,9 +1,10 @@
 import { EditorError } from "../errors/EditorError.js";
+import type { ReadonlyDocument } from "../api/ReadonlyDocument.js";
 import type { ShapePlacement } from "./ShapePlacement.js";
 import { GroupShape } from "./shapes/GroupShape.js";
 import type { Shape } from "./shapes/Shape.js";
 
-export class SvgDocument {
+export class SvgDocument implements ReadonlyDocument {
   private rootShapes: Shape[] = [];
   private sourcePathValue: string | null = null;
 
@@ -61,6 +62,10 @@ export class SvgDocument {
 
   public find(id: string): Shape | undefined {
     return this.flatten().find((shape) => shape.id === id);
+  }
+
+  public findShape(id: string): Shape | undefined {
+    return this.find(id);
   }
 
   public delete(id: string): Shape {

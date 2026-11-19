@@ -1,9 +1,10 @@
 import { EditorError } from "../../errors/EditorError.js";
+import type { ReadonlyShape } from "../../api/ReadonlyShape.js";
 import type { GroupShape } from "./GroupShape.js";
 
 export type ShapeAttribute = string | number;
 
-export abstract class Shape {
+export abstract class Shape implements ReadonlyShape {
   private parentValue: GroupShape | null = null;
   private readonly styles = new Map<string, string>();
 
@@ -14,6 +15,18 @@ export abstract class Shape {
 
   public get parent(): GroupShape | null {
     return this.parentValue;
+  }
+
+  public get kind(): string {
+    return this.type;
+  }
+
+  public get parentId(): string | null {
+    return this.parentValue?.id ?? null;
+  }
+
+  public get children(): readonly Shape[] {
+    return [];
   }
 
   public setParent(parent: GroupShape | null): void {

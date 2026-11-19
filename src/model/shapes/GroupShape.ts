@@ -8,7 +8,7 @@ export class GroupShape extends Shape {
     super(id, "g");
   }
 
-  public get children(): readonly Shape[] {
+  public override get children(): readonly Shape[] {
     return this.childList;
   }
 
