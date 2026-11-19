@@ -21,8 +21,10 @@ export class SetCommand extends EditingCommand {
 
   public override undo(document: SvgDocument): string {
     this.ensureExecuted();
-    document.requireShape(this.id).restoreAttribute(this.attribute, this.oldValue);
-    return this.undoResult();
+    const shape = document.requireShape(this.id);
+    shape.restoreAttribute(this.attribute, this.oldValue);
+    if (this.oldValue === undefined) return this.undoResult();
+    return `${shape.type}#${shape.id} updated: ${this.attribute}="${this.oldValue}"`;
   }
 
   public override redo(document: SvgDocument): string {
