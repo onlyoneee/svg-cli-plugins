@@ -2,6 +2,7 @@ import type { Plugin } from "../api/Plugin.js";
 import type { PluginContext } from "../api/PluginContext.js";
 import type { DefaultCommandContext } from "../core/commands/DefaultCommandContext.js";
 import type { CommandRegistry } from "../core/registries/CommandRegistry.js";
+import type { AttributeHandlerRegistry } from "../core/registries/AttributeHandlerRegistry.js";
 import { ShapeFactory } from "../model/ShapeFactory.js";
 import { SvgReader } from "../persistence/SvgReader.js";
 import { SvgWriter } from "../persistence/SvgWriter.js";
@@ -35,6 +36,7 @@ export class BuiltinCommandsPlugin implements Plugin {
     private readonly session: DefaultCommandContext,
     private readonly commandCatalog: CommandRegistry,
     private readonly factory: ShapeFactory,
+    private readonly attributeHandlers: AttributeHandlerRegistry,
   ) {
     this.reader = new SvgReader(factory);
   }
@@ -48,7 +50,7 @@ export class BuiltinCommandsPlugin implements Plugin {
     context.commands.register(new DeleteCliCommand(this.session));
     context.commands.register(new MoveCliCommand(this.session));
     context.commands.register(new ScaleCliCommand(this.session));
-    context.commands.register(new SetCliCommand(this.session));
+    context.commands.register(new SetCliCommand(this.session, this.attributeHandlers));
     context.commands.register(new GroupCliCommand(this.session));
     context.commands.register(new UngroupCliCommand(this.session));
     context.commands.register(new AddToCliCommand(this.session));

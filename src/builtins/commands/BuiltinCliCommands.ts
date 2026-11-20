@@ -12,6 +12,7 @@ import { SetCommand } from "../../commands/SetCommand.js";
 import { UngroupCommand } from "../../commands/UngroupCommand.js";
 import type { DefaultCommandContext } from "../../core/commands/DefaultCommandContext.js";
 import type { CommandRegistry } from "../../core/registries/CommandRegistry.js";
+import type { AttributeHandlerResolver } from "../../core/registries/AttributeHandlerRegistry.js";
 import { EditorError } from "../../errors/EditorError.js";
 import type { ShapeFactory } from "../../model/ShapeFactory.js";
 import { SvgDocument } from "../../model/SvgDocument.js";
@@ -180,9 +181,18 @@ export class SetCliCommand extends BuiltinCliCommand {
   public readonly helpLines = ["set <id> <attr> <value>"];
   public readonly requiresDocument = true;
 
+  public constructor(
+    session: DefaultCommandContext,
+    private readonly handlers: AttributeHandlerResolver,
+  ) {
+    super(session);
+  }
+
   public override execute(arguments_: readonly string[]): string {
     this.exactArgs(arguments_, 3, "set <id> <attr> <value>");
-    return this.session.execute(new SetCommand(arguments_[0] ?? "", arguments_[1] ?? "", arguments_[2] ?? ""));
+    return this.session.execute(
+      new SetCommand(this.handlers, arguments_[0] ?? "", arguments_[1] ?? "", arguments_[2] ?? ""),
+    );
   }
 }
 

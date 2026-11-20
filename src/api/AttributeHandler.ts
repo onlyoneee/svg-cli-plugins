@@ -7,9 +7,18 @@ export interface AttributeChangeRequest {
   readonly value: string;
 }
 
+export interface AttributeHandlerResult {
+  readonly executeMessage?: string;
+  readonly undoMessage?: string;
+  readonly redoMessage?: string;
+}
+
 export interface AttributeHandler {
   readonly name: string;
 
   handles(target: ReadonlyShape, attribute: string): boolean;
-  apply(request: AttributeChangeRequest, context: AttributeHandlerContext): void;
+  apply(
+    request: AttributeChangeRequest,
+    context: AttributeHandlerContext,
+  ): AttributeHandlerResult | void;
 }

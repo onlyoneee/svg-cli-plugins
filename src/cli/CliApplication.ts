@@ -18,19 +18,25 @@ export class CliApplication {
   private readonly commandContext = new DefaultCommandContext();
   private readonly commandRegistry = new CommandRegistry();
   private readonly shapeProviderRegistry = new ShapeProviderRegistry();
+  private readonly attributeHandlerRegistry = new AttributeHandlerRegistry();
   private readonly dispatcher: CommandDispatcher;
 
   public constructor(plugins: readonly Plugin[] = []) {
     const pluginContext = new DefaultPluginContext(
       this.commandRegistry,
       this.shapeProviderRegistry,
-      new AttributeHandlerRegistry(),
+      this.attributeHandlerRegistry,
       new TreeDecoratorRegistry(),
     );
 
     new BuiltinShapeProvidersPlugin().activate(pluginContext);
     const shapeFactory = new ShapeFactory(this.shapeProviderRegistry);
-    new BuiltinCommandsPlugin(this.commandContext, this.commandRegistry, shapeFactory).activate(pluginContext);
+    new BuiltinCommandsPlugin(
+      this.commandContext,
+      this.commandRegistry,
+      shapeFactory,
+      this.attributeHandlerRegistry,
+    ).activate(pluginContext);
     for (const plugin of plugins) {
       const activation = plugin.activate(pluginContext);
       if (activation instanceof Promise) {

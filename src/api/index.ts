@@ -1,4 +1,8 @@
-export type { AttributeChangeRequest, AttributeHandler } from "./AttributeHandler.js";
+export type {
+  AttributeChangeRequest,
+  AttributeHandler,
+  AttributeHandlerResult,
+} from "./AttributeHandler.js";
 export type { AttributeHandlerContext } from "./AttributeHandlerContext.js";
 export type { AttributeHandlerRegistration } from "./AttributeHandlerRegistration.js";
 export type { Command } from "./Command.js";

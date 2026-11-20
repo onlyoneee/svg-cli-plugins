@@ -3,7 +3,11 @@ import type { AttributeHandlerRegistration } from "../../api/AttributeHandlerReg
 import type { ReadonlyShape } from "../../api/ReadonlyShape.js";
 import { EditorError } from "../../errors/EditorError.js";
 
-export class AttributeHandlerRegistry implements AttributeHandlerRegistration {
+export interface AttributeHandlerResolver {
+  findMatches(target: ReadonlyShape, attribute: string): readonly AttributeHandler[];
+}
+
+export class AttributeHandlerRegistry implements AttributeHandlerRegistration, AttributeHandlerResolver {
   private readonly handlers = new Map<string, AttributeHandler>();
 
   public register(handler: AttributeHandler): void {
