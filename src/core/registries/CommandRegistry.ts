@@ -2,6 +2,10 @@ import type { Command } from "../../api/Command.js";
 import type { CommandRegistration } from "../../api/CommandRegistration.js";
 import { EditorError } from "../../errors/EditorError.js";
 
+export interface CommandRegistryCheckpoint {
+  readonly commands: ReadonlyMap<string, Command>;
+}
+
 export class CommandRegistry implements CommandRegistration {
   private readonly commands = new Map<string, Command>();
 
@@ -26,6 +30,15 @@ export class CommandRegistry implements CommandRegistration {
 
   public names(): readonly string[] {
     return [...this.commands.keys()];
+  }
+
+  public checkpoint(): CommandRegistryCheckpoint {
+    return { commands: new Map(this.commands) };
+  }
+
+  public restore(checkpoint: CommandRegistryCheckpoint): void {
+    this.commands.clear();
+    for (const [name, command] of checkpoint.commands) this.commands.set(name, command);
   }
 
   private normalizedName(name: string): string {

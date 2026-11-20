@@ -7,6 +7,13 @@ export interface ShapeProviderResolver {
   findForRead(svgTag: string, serializedKind?: string): ShapeProvider | undefined;
 }
 
+export interface ShapeProviderRegistryCheckpoint {
+  readonly providers: ReadonlyMap<string, ShapeProvider>;
+  readonly providersByShapeType: ReadonlyMap<string, ShapeProvider>;
+  readonly defaultProvidersBySvgTag: ReadonlyMap<string, ShapeProvider>;
+  readonly providersBySerializedKind: ReadonlyMap<string, ShapeProvider>;
+}
+
 export class ShapeProviderRegistry implements ShapeProviderRegistration, ShapeProviderResolver {
   private readonly providers = new Map<string, ShapeProvider>();
   private readonly providersByShapeType = new Map<string, ShapeProvider>();
@@ -63,6 +70,22 @@ export class ShapeProviderRegistry implements ShapeProviderRegistration, ShapePr
     return [...this.providers.keys()];
   }
 
+  public checkpoint(): ShapeProviderRegistryCheckpoint {
+    return {
+      providers: new Map(this.providers),
+      providersByShapeType: new Map(this.providersByShapeType),
+      defaultProvidersBySvgTag: new Map(this.defaultProvidersBySvgTag),
+      providersBySerializedKind: new Map(this.providersBySerializedKind),
+    };
+  }
+
+  public restore(checkpoint: ShapeProviderRegistryCheckpoint): void {
+    this.restoreMap(this.providers, checkpoint.providers);
+    this.restoreMap(this.providersByShapeType, checkpoint.providersByShapeType);
+    this.restoreMap(this.defaultProvidersBySvgTag, checkpoint.defaultProvidersBySvgTag);
+    this.restoreMap(this.providersBySerializedKind, checkpoint.providersBySerializedKind);
+  }
+
   private requiredKey(value: string): string {
     const normalized = this.lookupKey(value);
     if (!normalized) throw new EditorError("invalid registration: shapes/<empty>");
@@ -81,5 +104,13 @@ export class ShapeProviderRegistry implements ShapeProviderRegistration, ShapePr
     if (registrations.has(key)) {
       throw new EditorError(`duplicate registration: shapes/${reportedName}`);
     }
+  }
+
+  private restoreMap(
+    target: Map<string, ShapeProvider>,
+    source: ReadonlyMap<string, ShapeProvider>,
+  ): void {
+    target.clear();
+    for (const [key, provider] of source) target.set(key, provider);
   }
 }

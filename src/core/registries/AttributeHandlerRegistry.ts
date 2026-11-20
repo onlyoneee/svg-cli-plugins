@@ -7,6 +7,10 @@ export interface AttributeHandlerResolver {
   findMatches(target: ReadonlyShape, attribute: string): readonly AttributeHandler[];
 }
 
+export interface AttributeHandlerRegistryCheckpoint {
+  readonly handlers: ReadonlyMap<string, AttributeHandler>;
+}
+
 export class AttributeHandlerRegistry implements AttributeHandlerRegistration, AttributeHandlerResolver {
   private readonly handlers = new Map<string, AttributeHandler>();
 
@@ -28,6 +32,15 @@ export class AttributeHandlerRegistry implements AttributeHandlerRegistration, A
 
   public names(): readonly string[] {
     return [...this.handlers.keys()];
+  }
+
+  public checkpoint(): AttributeHandlerRegistryCheckpoint {
+    return { handlers: new Map(this.handlers) };
+  }
+
+  public restore(checkpoint: AttributeHandlerRegistryCheckpoint): void {
+    this.handlers.clear();
+    for (const [name, handler] of checkpoint.handlers) this.handlers.set(name, handler);
   }
 
   private normalizedName(name: string): string {

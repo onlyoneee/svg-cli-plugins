@@ -8,6 +8,7 @@ const terminal = createInterface({
   prompt: "svg> ",
 });
 
+for (const error of application.startupErrors()) console.error(error);
 console.log("svg-editor 0.1 — type 'help' for commands");
 terminal.prompt();
 

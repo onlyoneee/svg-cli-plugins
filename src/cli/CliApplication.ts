@@ -4,15 +4,20 @@ import { BuiltinShapeProvidersPlugin } from "../builtins/BuiltinShapeProvidersPl
 import { CommandDispatcher } from "../core/commands/CommandDispatcher.js";
 import { DefaultCommandContext } from "../core/commands/DefaultCommandContext.js";
 import { DefaultPluginContext } from "../core/plugins/DefaultPluginContext.js";
+import {
+  PluginActivationManager,
+  type PluginActivationRequest,
+} from "../core/plugins/PluginActivationManager.js";
 import { AttributeHandlerRegistry } from "../core/registries/AttributeHandlerRegistry.js";
 import { CommandRegistry } from "../core/registries/CommandRegistry.js";
 import { ShapeProviderRegistry } from "../core/registries/ShapeProviderRegistry.js";
 import { TreeDecoratorRegistry } from "../core/registries/TreeDecoratorRegistry.js";
 import { TreeRenderer } from "../core/trees/TreeRenderer.js";
-import { EditorError } from "../errors/EditorError.js";
 import type { SvgDocument } from "../model/SvgDocument.js";
 import { ShapeFactory } from "../model/ShapeFactory.js";
 import { CommandTokenizer } from "./CommandTokenizer.js";
+
+export type CliPluginInput = Plugin | PluginActivationRequest;
 
 export class CliApplication {
   private readonly tokenizer = new CommandTokenizer();
@@ -21,9 +26,10 @@ export class CliApplication {
   private readonly shapeProviderRegistry = new ShapeProviderRegistry();
   private readonly attributeHandlerRegistry = new AttributeHandlerRegistry();
   private readonly treeDecoratorRegistry = new TreeDecoratorRegistry();
+  private readonly activationErrors: string[] = [];
   private readonly dispatcher: CommandDispatcher;
 
-  public constructor(plugins: readonly Plugin[] = []) {
+  public constructor(plugins: readonly CliPluginInput[] = []) {
     const pluginContext = new DefaultPluginContext(
       this.commandRegistry,
       this.shapeProviderRegistry,
@@ -31,23 +37,27 @@ export class CliApplication {
       this.treeDecoratorRegistry,
     );
 
-    new BuiltinShapeProvidersPlugin().activate(pluginContext);
+    const pluginManager = new PluginActivationManager(pluginContext);
+
+    pluginManager.activateSync(new BuiltinShapeProvidersPlugin());
     const shapeFactory = new ShapeFactory(this.shapeProviderRegistry);
     const treeRenderer = new TreeRenderer(this.treeDecoratorRegistry);
-    new BuiltinCommandsPlugin(
-      this.commandContext,
-      this.commandRegistry,
-      shapeFactory,
-      this.attributeHandlerRegistry,
-      treeRenderer,
-    ).activate(pluginContext);
-    for (const plugin of plugins) {
-      const activation = plugin.activate(pluginContext);
-      if (activation instanceof Promise) {
-        throw new EditorError("asynchronous plugin activation requires the plugin loader");
-      }
-    }
+    pluginManager.activateSync(
+      new BuiltinCommandsPlugin(
+        this.commandContext,
+        this.commandRegistry,
+        shapeFactory,
+        this.attributeHandlerRegistry,
+        treeRenderer,
+      ),
+    );
+    const activationResult = pluginManager.activateAllSync(plugins.map((plugin) => this.activationRequest(plugin)));
+    this.activationErrors.push(...activationResult.errors);
     this.dispatcher = new CommandDispatcher(this.commandRegistry, this.commandContext);
+  }
+
+  public startupErrors(): readonly string[] {
+    return [...this.activationErrors];
   }
 
   public executeLine(line: string): string | null {
@@ -64,5 +74,9 @@ export class CliApplication {
 
   public currentDocument(): SvgDocument | null {
     return this.commandContext.currentDocument();
+  }
+
+  private activationRequest(input: CliPluginInput): PluginActivationRequest {
+    return "activate" in input ? { plugin: input } : input;
   }
 }

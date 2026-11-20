@@ -6,6 +6,10 @@ export interface TreeDecoratorResolver {
   list(): readonly TreeDecorator[];
 }
 
+export interface TreeDecoratorRegistryCheckpoint {
+  readonly decorators: ReadonlyMap<string, TreeDecorator>;
+}
+
 export class TreeDecoratorRegistry implements TreeDecoratorRegistration, TreeDecoratorResolver {
   private readonly decorators = new Map<string, TreeDecorator>();
 
@@ -23,6 +27,15 @@ export class TreeDecoratorRegistry implements TreeDecoratorRegistration, TreeDec
 
   public names(): readonly string[] {
     return [...this.decorators.keys()];
+  }
+
+  public checkpoint(): TreeDecoratorRegistryCheckpoint {
+    return { decorators: new Map(this.decorators) };
+  }
+
+  public restore(checkpoint: TreeDecoratorRegistryCheckpoint): void {
+    this.decorators.clear();
+    for (const [name, decorator] of checkpoint.decorators) this.decorators.set(name, decorator);
   }
 
   private normalizedName(name: string): string {
