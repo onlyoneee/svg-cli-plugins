@@ -88,6 +88,7 @@ const shapeView: ReadonlyShape = {
   parentId: null,
   children: [],
   getAttribute: () => undefined,
+  summary: () => "g#n1",
 };
 
 test("command registry preserves order and performs case-insensitive lookup", () => {

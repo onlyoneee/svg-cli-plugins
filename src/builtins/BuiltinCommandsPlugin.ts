@@ -3,6 +3,7 @@ import type { PluginContext } from "../api/PluginContext.js";
 import type { DefaultCommandContext } from "../core/commands/DefaultCommandContext.js";
 import type { CommandRegistry } from "../core/registries/CommandRegistry.js";
 import type { AttributeHandlerRegistry } from "../core/registries/AttributeHandlerRegistry.js";
+import type { TreeRenderer } from "../core/trees/TreeRenderer.js";
 import { ShapeFactory } from "../model/ShapeFactory.js";
 import { SvgReader } from "../persistence/SvgReader.js";
 import { SvgWriter } from "../persistence/SvgWriter.js";
@@ -37,6 +38,7 @@ export class BuiltinCommandsPlugin implements Plugin {
     private readonly commandCatalog: CommandRegistry,
     private readonly factory: ShapeFactory,
     private readonly attributeHandlers: AttributeHandlerRegistry,
+    private readonly treeRenderer: TreeRenderer,
   ) {
     this.reader = new SvgReader(factory);
   }
@@ -56,7 +58,7 @@ export class BuiltinCommandsPlugin implements Plugin {
     context.commands.register(new AddToCliCommand(this.session));
     context.commands.register(new FrontCliCommand(this.session));
     context.commands.register(new BackCliCommand(this.session));
-    context.commands.register(new TreeCliCommand(this.session));
+    context.commands.register(new TreeCliCommand(this.session, this.treeRenderer));
     context.commands.register(new ShowCliCommand(this.session));
     context.commands.register(new HelpCliCommand(this.session, this.commandCatalog));
     context.commands.register(new UndoCliCommand(this.session));

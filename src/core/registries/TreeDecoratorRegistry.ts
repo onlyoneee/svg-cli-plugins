@@ -2,7 +2,11 @@ import type { TreeDecorator } from "../../api/TreeDecorator.js";
 import type { TreeDecoratorRegistration } from "../../api/TreeDecoratorRegistration.js";
 import { EditorError } from "../../errors/EditorError.js";
 
-export class TreeDecoratorRegistry implements TreeDecoratorRegistration {
+export interface TreeDecoratorResolver {
+  list(): readonly TreeDecorator[];
+}
+
+export class TreeDecoratorRegistry implements TreeDecoratorRegistration, TreeDecoratorResolver {
   private readonly decorators = new Map<string, TreeDecorator>();
 
   public register(decorator: TreeDecorator): void {

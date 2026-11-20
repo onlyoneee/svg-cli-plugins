@@ -13,6 +13,7 @@ import { UngroupCommand } from "../../commands/UngroupCommand.js";
 import type { DefaultCommandContext } from "../../core/commands/DefaultCommandContext.js";
 import type { CommandRegistry } from "../../core/registries/CommandRegistry.js";
 import type { AttributeHandlerResolver } from "../../core/registries/AttributeHandlerRegistry.js";
+import type { TreeRenderer } from "../../core/trees/TreeRenderer.js";
 import { EditorError } from "../../errors/EditorError.js";
 import type { ShapeFactory } from "../../model/ShapeFactory.js";
 import { SvgDocument } from "../../model/SvgDocument.js";
@@ -256,9 +257,16 @@ export class TreeCliCommand extends BuiltinCliCommand {
   public readonly helpLines = ["tree [id]"];
   public readonly requiresDocument = true;
 
+  public constructor(
+    session: DefaultCommandContext,
+    private readonly renderer: TreeRenderer,
+  ) {
+    super(session);
+  }
+
   public override execute(arguments_: readonly string[]): string {
     if (arguments_.length > 1) throw new EditorError("usage: tree [id]");
-    return this.session.requireDocument().tree(arguments_[0]);
+    return this.renderer.render(this.session.requireDocument(), arguments_[0]);
   }
 }
 

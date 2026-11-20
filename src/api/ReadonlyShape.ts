@@ -6,4 +6,5 @@ export interface ReadonlyShape {
   readonly children: readonly ReadonlyShape[];
 
   getAttribute(name: string): string | undefined;
+  summary(): string;
 }

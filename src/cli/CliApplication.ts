@@ -8,6 +8,7 @@ import { AttributeHandlerRegistry } from "../core/registries/AttributeHandlerReg
 import { CommandRegistry } from "../core/registries/CommandRegistry.js";
 import { ShapeProviderRegistry } from "../core/registries/ShapeProviderRegistry.js";
 import { TreeDecoratorRegistry } from "../core/registries/TreeDecoratorRegistry.js";
+import { TreeRenderer } from "../core/trees/TreeRenderer.js";
 import { EditorError } from "../errors/EditorError.js";
 import type { SvgDocument } from "../model/SvgDocument.js";
 import { ShapeFactory } from "../model/ShapeFactory.js";
@@ -19,6 +20,7 @@ export class CliApplication {
   private readonly commandRegistry = new CommandRegistry();
   private readonly shapeProviderRegistry = new ShapeProviderRegistry();
   private readonly attributeHandlerRegistry = new AttributeHandlerRegistry();
+  private readonly treeDecoratorRegistry = new TreeDecoratorRegistry();
   private readonly dispatcher: CommandDispatcher;
 
   public constructor(plugins: readonly Plugin[] = []) {
@@ -26,16 +28,18 @@ export class CliApplication {
       this.commandRegistry,
       this.shapeProviderRegistry,
       this.attributeHandlerRegistry,
-      new TreeDecoratorRegistry(),
+      this.treeDecoratorRegistry,
     );
 
     new BuiltinShapeProvidersPlugin().activate(pluginContext);
     const shapeFactory = new ShapeFactory(this.shapeProviderRegistry);
+    const treeRenderer = new TreeRenderer(this.treeDecoratorRegistry);
     new BuiltinCommandsPlugin(
       this.commandContext,
       this.commandRegistry,
       shapeFactory,
       this.attributeHandlerRegistry,
+      treeRenderer,
     ).activate(pluginContext);
     for (const plugin of plugins) {
       const activation = plugin.activate(pluginContext);
