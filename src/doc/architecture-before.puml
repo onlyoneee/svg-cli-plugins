@@ -1,0 +1,102 @@
+@startuml
+title Phase 1 重构前模块依赖
+
+skinparam componentStyle rectangle
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+package "CLI" {
+  class CliApplication {
+    - handlers: Map<string, Handler>
+    - document: SvgDocument
+    - history: CommandHistory
+    - factory: ShapeFactory
+    - reader: SvgReader
+    - writer: SvgWriter
+    + executeLine(line): string
+  }
+  class CommandTokenizer
+}
+
+package "Commands" {
+  class CommandHistory
+  abstract class EditingOperation
+  class CreateCommand
+  class SetCommand
+  class "Other editing commands" as OtherCommands
+}
+
+package "Model" {
+  class SvgDocument {
+    + tree(id): string
+    + show(id): string
+  }
+  class ShapeFactory {
+    - creators: Map<string, Creator>
+    + create(type, ...): Shape
+    + createFromSvg(type, ...): Shape
+  }
+  abstract class Shape
+  class RectShape
+  class CircleShape
+  class EllipseShape
+  class LineShape
+  class TextShape
+  class GroupShape
+}
+
+package "Persistence" {
+  class SvgReader
+  class SvgWriter
+}
+
+CliApplication --> CommandTokenizer
+CliApplication --> CommandHistory
+CliApplication --> SvgDocument
+CliApplication --> ShapeFactory
+CliApplication --> SvgReader
+CliApplication --> SvgWriter
+CliApplication --> CreateCommand
+CliApplication --> SetCommand
+CliApplication --> OtherCommands
+
+CommandHistory o--> EditingOperation
+CreateCommand --|> EditingOperation
+SetCommand --|> EditingOperation
+OtherCommands --|> EditingOperation
+CreateCommand --> ShapeFactory
+
+ShapeFactory --> RectShape
+ShapeFactory --> CircleShape
+ShapeFactory --> EllipseShape
+ShapeFactory --> LineShape
+ShapeFactory --> TextShape
+ShapeFactory --> GroupShape
+
+RectShape --|> Shape
+CircleShape --|> Shape
+EllipseShape --|> Shape
+LineShape --|> Shape
+TextShape --|> Shape
+GroupShape --|> Shape
+SvgDocument o--> Shape
+SvgDocument --> GroupShape : container checks
+SvgReader --> ShapeFactory
+SvgWriter --> SvgDocument
+
+note right of CliApplication
+  命令名到私有处理函数直接映射。
+  新增命令需要修改 CLI 内核。
+end note
+
+note right of ShapeFactory
+  直接枚举六种图形及其参数读取。
+  新增图形需要修改工厂。
+end note
+
+note bottom of SvgDocument
+  tree 标签没有扩展调用点。
+  set 直接调用 Shape.setAttribute()。
+end note
+
+@enduml

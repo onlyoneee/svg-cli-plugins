@@ -5,6 +5,15 @@
 - 最后更新：2026-11-20
 - 适用范围：`Command`、`ShapeProvider`、`AttributeHandler`、`TreeDecorator` 及插件注册事务
 
+相关文档：
+
+- [ADR-002：SVG 专用图形读回与缺失插件降级](./adr-002-svg-read-fallback.md)
+- [ADR-003：插件激活的暂存、校验与原子提交](./adr-003-plugin-activation-transaction.md)
+- [重构前后模块依赖图说明](./architecture-diagrams.md)
+- [B 任务交接：stats 与 dir 命令插件](./handoff-b-command-plugins.md)
+- [C 任务交接：box 与属性处理器](./handoff-c-box-attribute-plugin.md)
+- [D 任务交接：树标签与配置加载器](./handoff-d-tree-loader.md)
+
 ## 1. 文档目的
 
 本文档用于说明 CLI 内核开放的四个扩展点及其调用契约，并记录属性处理器的冲突处理、撤销/重做和失败回滚决策。文档中的类名、调用位置和错误文本均对应当前代码，可用于代码审查和 Phase 2 验收。

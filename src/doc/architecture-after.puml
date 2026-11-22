@@ -1,0 +1,126 @@
+@startuml
+title Phase 2 插件式重构后模块依赖
+
+skinparam componentStyle rectangle
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+package "Composition Root / CLI" {
+  class CliApplication
+  class PluginActivationManager
+  class DefaultPluginContext
+}
+
+package "Public Extension API" {
+  interface Plugin
+  interface Command
+  interface ShapeProvider
+  interface AttributeHandler
+  interface TreeDecorator
+  interface CommandContext
+  interface ShapeProviderContext
+  interface AttributeHandlerContext
+  interface TreeDecorationContext
+  interface ReadonlyDocument
+  interface ReadonlyShape
+}
+
+package "Core Registries" {
+  class CommandRegistry
+  class ShapeProviderRegistry
+  class AttributeHandlerRegistry
+  class TreeDecoratorRegistry
+}
+
+package "Core Invocation" {
+  class CommandDispatcher
+  class ShapeFactory
+  class SetCommand
+  class AttributeTransaction
+  class TreeRenderer
+}
+
+package "Built-in Plugins" {
+  class BuiltinCommandsPlugin
+  class BuiltinShapeProvidersPlugin
+  class "19 built-in commands" as BuiltinCommands
+  class "6 built-in shape providers" as BuiltinShapes
+}
+
+package "Optional Plugins (B/C/D)" {
+  class "stats / dir" as OptionalCommands
+  class "box provider + handlers" as BoxPlugin
+  class "modified-star / box label" as OptionalDecorators
+}
+
+CliApplication --> PluginActivationManager
+CliApplication --> DefaultPluginContext
+CliApplication --> CommandDispatcher
+CliApplication --> ShapeFactory
+CliApplication --> TreeRenderer
+CliApplication ..> BuiltinCommandsPlugin : activate
+CliApplication ..> BuiltinShapeProvidersPlugin : activate
+
+PluginActivationManager --> Plugin : activate(staged context)
+PluginActivationManager --> DefaultPluginContext : staging / live
+DefaultPluginContext o--> CommandRegistry
+DefaultPluginContext o--> ShapeProviderRegistry
+DefaultPluginContext o--> AttributeHandlerRegistry
+DefaultPluginContext o--> TreeDecoratorRegistry
+
+CommandRegistry o--> Command
+ShapeProviderRegistry o--> ShapeProvider
+AttributeHandlerRegistry o--> AttributeHandler
+TreeDecoratorRegistry o--> TreeDecorator
+
+CommandDispatcher --> CommandRegistry : lookup
+CommandDispatcher --> CommandContext
+ShapeFactory --> ShapeProviderRegistry : resolve create/read
+ShapeProvider --> ShapeProviderContext
+SetCommand --> AttributeHandlerRegistry : find matches
+SetCommand --> AttributeTransaction
+AttributeTransaction ..|> AttributeHandlerContext
+TreeRenderer --> TreeDecoratorRegistry : ordered labels
+TreeDecorator --> TreeDecorationContext
+TreeDecorationContext --> ReadonlyDocument
+ReadonlyDocument o--> ReadonlyShape
+
+BuiltinCommandsPlugin ..|> Plugin
+BuiltinShapeProvidersPlugin ..|> Plugin
+BuiltinCommands ..|> Command
+BuiltinShapes ..|> ShapeProvider
+BuiltinCommandsPlugin o--> BuiltinCommands
+BuiltinShapeProvidersPlugin o--> BuiltinShapes
+
+OptionalCommands ..|> Command
+BoxPlugin ..|> ShapeProvider
+BoxPlugin ..|> AttributeHandler
+OptionalDecorators ..|> TreeDecorator
+
+note right of PluginActivationManager
+  activate → validate manifest
+  → checkpoint → atomic commit/rollback
+end note
+
+note bottom of CommandDispatcher
+  新命令只需注册 Command，
+  不修改命令分发内核。
+end note
+
+note bottom of ShapeFactory
+  新图形只需注册 ShapeProvider，
+  不修改图形创建与读回内核。
+end note
+
+note bottom of SetCommand
+  0 个处理器使用 Phase 1 缺省语义；
+  1 个处理器使用增量事务；
+  多个处理器拒绝冲突。
+end note
+
+note bottom of TreeRenderer
+  无装饰器时 Phase 1 输出不变；
+  多标签按注册顺序组合。
+end note
+
+@enduml
