@@ -1,0 +1,15 @@
+# Fixed directory fixture: docs/, .hidden, demo.svg (logs kept elsewhere).
+dir
+init
+stats
+create g empty
+create g group
+create circle c 1 1 1 in group
+create rect r 0 0 10 10
+stats
+move r 2 3
+undo
+stats
+dir
+redo
+stats

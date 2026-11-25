@@ -6,7 +6,11 @@
     "cli": "npm run build && node dist/src/main.js",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "test": "npm run build && node --test dist/tests/*.test.js"
+    "test": "npm run build && node --test dist/tests/*.test.js",
+    "cli:commands": "npm run build && node dist/src/assembly/command-plugins-main.mjs",
+    "test:commands": "npm run build && node --test dist/tests/CommandPlugins.test.js dist/tests/StatsCommand.test.js dist/tests/DirCommand.test.js dist/tests/CommandAssembly.test.js",
+    "test:stats": "npm run build && node --test dist/tests/StatsCommand.test.js",
+    "test:dir": "npm run build && node --test dist/tests/DirCommand.test.js"
   },
   "keywords": [],
   "author": "",

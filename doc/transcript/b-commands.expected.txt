@@ -1,0 +1,18 @@
+[DIR]  docs
+[FILE]  .hidden
+[FILE]  demo.svg
+canvas 800x600 created
+(total 0, containers 0)
+g#empty created
+g#group created
+circle#c created in g#group
+rect#r created
+circle: 1  rect: 1  (total 2, containers 2)
+rect#r moved to (2,3)
+rect#r moved back to (0,0)
+circle: 1  rect: 1  (total 2, containers 2)
+[DIR]  docs
+[FILE]  .hidden
+[FILE]  demo.svg
+rect#r moved to (2,3)
+circle: 1  rect: 1  (total 2, containers 2)
