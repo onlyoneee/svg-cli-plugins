@@ -20,10 +20,11 @@ export class CreateCommand extends EditingOperation {
 
   protected override apply(document: SvgDocument): string {
     const shape = this.factory.create(this.type, this.id, this.parameters, document, this.containerId);
+    const message = shape.creationSummary();
     document.add(shape, this.containerId);
     this.shape = shape;
     this.placement = document.locationOf(shape.id);
-    return `${shape.type}#${shape.id} created${this.containerId ? ` in g#${this.containerId}` : ""}`;
+    return `${message}${this.containerId ? ` in g#${this.containerId}` : ""}`;
   }
 
   public override undo(document: SvgDocument): string {
