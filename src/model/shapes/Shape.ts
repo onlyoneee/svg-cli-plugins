@@ -114,6 +114,10 @@ export abstract class Shape implements ReadonlyShape {
     return null;
   }
 
+  public creationSummary(): string {
+    return `${this.type}#${this.id} created`;
+  }
+
   protected abstract getGeometryAttribute(name: string): string;
   protected abstract setGeometryAttribute(name: string, value: string): void;
   public abstract move(dx: number, dy: number): void;

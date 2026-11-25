@@ -4,8 +4,16 @@ import { Shape } from "./Shape.js";
 export class GroupShape extends Shape {
   private readonly childList: Shape[] = [];
 
-  public constructor(id: string) {
-    super(id, "g");
+  public constructor(id: string, type = "g") {
+    super(id, type);
+  }
+
+  public get canUngroup(): boolean {
+    return true;
+  }
+
+  public isRequiredChild(_child: Shape): boolean {
+    return false;
   }
 
   public override get children(): readonly Shape[] {

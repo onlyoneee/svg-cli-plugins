@@ -83,6 +83,7 @@ export class SvgDocument implements ReadonlyDocument {
 
   public removeWithLocation(id: string): ShapePlacement {
     const placement = this.locationOf(id);
+    this.ensureRemovable(placement.shape);
     this.detach(placement.shape);
     return placement;
   }
@@ -99,6 +100,7 @@ export class SvgDocument implements ReadonlyDocument {
     if (parent === shape || (shape instanceof GroupShape && parent && shape.containsDescendant(parent))) {
       throw new EditorError(`cannot add a container into its own descendant: ${id}`);
     }
+    if (parent !== shape.parent) this.ensureRemovable(shape);
     this.detach(shape);
     this.insert(shape, parent, index);
   }
@@ -111,6 +113,7 @@ export class SvgDocument implements ReadonlyDocument {
 
     const targets = ids.map((id) => this.requireShape(id));
     for (const candidate of targets) {
+      this.ensureRemovable(candidate);
       if (!(candidate instanceof GroupShape)) continue;
       for (const other of targets) {
         if (candidate !== other && candidate.containsDescendant(other)) {
@@ -135,10 +138,13 @@ export class SvgDocument implements ReadonlyDocument {
 
   public ungroup(id: string): number {
     const group = this.requireContainer(id);
+    if (!group.canUngroup) throw new EditorError(`cannot ungroup composite shape: ${id}`);
     if (group.parent === null) throw new EditorError(`cannot ungroup top-level container: ${id}`);
     const parent = group.parent;
     const index = parent.indexOf(group);
     const children = [...group.children];
+    this.ensureRemovable(group);
+    for (const child of children) this.ensureRemovable(child);
     parent.removeChild(group);
     for (let offset = 0; offset < children.length; offset += 1) {
       const child = children[offset];
@@ -151,12 +157,7 @@ export class SvgDocument implements ReadonlyDocument {
 
   public addTo(groupId: string, shapeId: string): void {
     const group = this.requireContainer(groupId);
-    const shape = this.requireShape(shapeId);
-    if (group === shape || (shape instanceof GroupShape && shape.containsDescendant(group))) {
-      throw new EditorError(`cannot add a container into its own descendant: ${shapeId}`);
-    }
-    this.detach(shape);
-    group.addChild(shape);
+    this.relocate(shapeId, groupId, group.children.length);
   }
 
   public bringToFront(id: string): void {
@@ -232,6 +233,12 @@ export class SvgDocument implements ReadonlyDocument {
       if (shape instanceof GroupShape) result.push(...this.flattenFrom(shape.children));
     }
     return result;
+  }
+
+  private ensureRemovable(shape: Shape): void {
+    if (shape.parent?.isRequiredChild(shape)) {
+      throw new EditorError(`cannot remove required child: ${shape.id} of ${shape.parent.id}`);
+    }
   }
 
   private detach(shape: Shape): number {
